@@ -1,114 +1,84 @@
 package com.ignite.wordfinder;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.util.Pair;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.Toast;
 
-import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.ignite.wordfinder.model.Word;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import cz.msebera.android.httpclient.Header;
-
-public class MainActivity extends AppCompatActivity {
-
-    List<String> wordList = new ArrayList<>();
-    List<Pair<String, HashMap<String, List<String>>>> words = new ArrayList();
-    ListView listView;
-    Button findButton;
-    EditText editText;
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private DrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        listView = findViewById(R.id.list);
-        findButton = findViewById(R.id.findButton);
-        editText = findViewById(R.id.editText);
-        final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, wordList);
-        listView.setAdapter(adapter);
 
-        findButton.setOnClickListener(new View.OnClickListener() {
+        drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        Toolbar toolbar = findViewById(R.id.toolBar);
+        setSupportActionBar(toolbar);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close) {
+
             @Override
-            public void onClick(View v) {
-                final String word = editText.getText().toString();
-                if (!word.isEmpty()) {
-                    HttpRequest.find(word, new AsyncHttpResponseHandler() {
-                        @Override
-                        public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                            Log.i("success", String.valueOf(statusCode));
-                            wordList.add(word);
-                            adapter.notifyDataSetChanged();
-                            try {
-                                HashMap<String, List<String>> map;
-                                map = getDefinitions(new JSONObject(new String(responseBody)).getJSONObject("meaning"));
-                                words.add(new Pair<>(word, map));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                            Log.i("failed", responseBody.toString());
-                            Toast.makeText(getApplicationContext(), "Word not found", Toast.LENGTH_LONG);
-                        }
-                    });
-                    editText.getText().clear();
-                }
+            public void onDrawerSlide(View drawerView, float slideOffset) {
             }
-        });
+        };
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getApplicationContext(), WordActivity.class);
-                intent.putExtra("word", words.get(position).first);
-                intent.putExtra("definitions", words.get(position).second);
-                startActivity(intent);
-            }
-        });
-
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment()).commit();
+            navigationView.setCheckedItem(R.id.nav_home);
+        }
     }
 
-
-    private static HashMap<String, List<String>> getDefinitions(JSONObject object) {
-        HashMap<String, List<String>> map = new HashMap<>();
-        try {
-            Iterator<String> keys = object.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                JSONArray array = object.getJSONArray(key);
-                List<String> definitions = new ArrayList<>();
-                for (int i = 0; i < array.length(); i++) {
-                    JSONObject def = array.getJSONObject(i);
-                    definitions.add(def.getString("definition"));
-                }
-                map.put(key, definitions);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case R.id.nav_home:
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment()).commit();
+                break;
+            case R.id.nav_myWords:
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new MyWordsFragment()).commit();
+                break;
         }
-        return map;
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    /**
+     * Shows the word detail fragment
+     */
+    public void show(Word word) {
+
+//        WordFragment productFragment = WordFragment.forProduct(word.getId());
+//
+//        getSupportFragmentManager()
+//                .beginTransaction()
+//                .addToBackStack("word")
+//                .replace(R.id.fragment_container,
+//                        wordFragment, null).commit();
     }
 
 }
