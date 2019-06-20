@@ -6,8 +6,10 @@ import android.arch.persistence.room.PrimaryKey;
 
 import com.ignite.wordfinder.model.Word;
 
+import java.io.Serializable;
+
 @Entity(tableName = "words")
-public class WordEntity implements Word {
+public class WordEntity implements Word, Serializable {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String name;

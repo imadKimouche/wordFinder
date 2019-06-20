@@ -20,4 +20,7 @@ public interface DefinitionDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<DefinitionEntity> definitions);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertAll(List<DefinitionEntity>[] lists);
 }

@@ -3,8 +3,8 @@ package com.ignite.wordfinder.db;
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
 import android.os.AsyncTask;
-import android.util.Log;
 
+import com.ignite.wordfinder.db.dao.DefinitionDao;
 import com.ignite.wordfinder.db.dao.WordDao;
 import com.ignite.wordfinder.db.entity.DefinitionEntity;
 import com.ignite.wordfinder.db.entity.WordEntity;
@@ -71,7 +71,6 @@ public class DataRepository {
     public Boolean wordExists(WordEntity word) throws ExecutionException, InterruptedException {
         AsyncTask<WordEntity, Void, Boolean> task = new existsAsyncTask(mDatabase.wordDao()).execute(word);
         Boolean result = task.get();
-        Log.i("bool", String.valueOf(result));
         return result;
     }
 
@@ -96,6 +95,55 @@ public class DataRepository {
     public LiveData<List<DefinitionEntity>> loadDefinitions(final int wordId) {
         return mDatabase.definitionDao().loadDefinitions(wordId);
     }
+
+    public void insert(List<DefinitionEntity> definitions) {
+        mDatabase.definitionDao().insertAll(definitions);
+    }
+
+
+    private static class insertDefAsyncTask extends AsyncTask<List<DefinitionEntity>, Void, Void> {
+
+        private DefinitionDao mAsyncTaskDao;
+
+        insertDefAsyncTask(DefinitionDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(List<DefinitionEntity>... lists) {
+            mAsyncTaskDao.insertAll(lists);
+            return null;
+        }
+    }
+
+
+    public WordEntity getWordByName(String word) {
+        WordEntity result = null;
+        AsyncTask<String, Void, WordEntity> task = new gwbnAsyncTask(mDatabase.wordDao()).execute(word);
+        try {
+            result = task.get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    private static class gwbnAsyncTask extends AsyncTask<String, Void, WordEntity> {
+
+        private WordDao mAsyncTaskDao;
+
+        gwbnAsyncTask(WordDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected WordEntity doInBackground(final String... params) {
+            return mAsyncTaskDao.getWordByName(params[0]);
+        }
+    }
+
 
 //    public LiveData<List<WordEntity>> searchProducts(String query) {
 //        return mDatabase.productDao().searchAllProducts(query);

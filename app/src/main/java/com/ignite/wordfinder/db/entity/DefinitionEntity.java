@@ -64,8 +64,7 @@ public class DefinitionEntity implements Definition {
     }
 
     @Ignore
-    public DefinitionEntity(int id, int wordId, String text, String type) {
-        this.id = id;
+    public DefinitionEntity(int wordId, String text, String type) {
         this.wordId = wordId;
         this.text = text;
         this.type = type;

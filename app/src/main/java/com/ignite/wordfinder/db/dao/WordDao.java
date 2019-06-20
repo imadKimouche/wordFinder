@@ -31,6 +31,9 @@ public interface WordDao {
     @Query("select * from words where id = :wordId")
     WordEntity loadWordSync(int wordId);
 
+    @Query("select * from words where name = :word")
+    WordEntity getWordByName(String word);
+
 //    @Query("SELECT products.* FROM products JOIN productsFts ON (products.id = productsFts.rowid) "
 //            + "WHERE productsFts MATCH :query")
 //    LiveData<List<ProductEntity>> searchAllProducts(String query);

@@ -19,9 +19,11 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.ignite.wordfinder.db.entity.DefinitionEntity;
 import com.ignite.wordfinder.db.entity.WordEntity;
 import com.ignite.wordfinder.model.Word;
 import com.ignite.wordfinder.viewmodel.WordListViewModel;
+import com.ignite.wordfinder.viewmodel.WordViewModel;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
 import org.json.JSONArray;
@@ -38,8 +40,8 @@ import cz.msebera.android.httpclient.Header;
 
 public class HomeFragment extends Fragment {
     private Context mContext;
-    List<String> wordList = new ArrayList<>();
-    List<Pair<String, HashMap<String, List<String>>>> words = new ArrayList();
+    List<WordEntity> wordList = new ArrayList<>();
+    List<DefinitionEntity> definitions = new ArrayList<>();
     ListView listView;
     Button findButton;
     EditText editText;
@@ -68,13 +70,12 @@ public class HomeFragment extends Fragment {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                             Log.i("success", String.valueOf(statusCode));
-                            wordList.add(word);
+                            wordList.add(new WordEntity(word));
                             adapter.notifyDataSetChanged();
                             try {
-                                HashMap<String, List<String>> map;
-                                map = getDefinitions(new JSONObject(new String(responseBody)).getJSONObject("meaning"));
-                                words.add(new Pair<>(word, map));
                                 viewModel.insert(new WordEntity(word));
+                                definitions = getDefinitions(new JSONObject(new String(responseBody)).getJSONObject("meaning"), viewModel.getWordByName(word).getId());
+                                viewModel.insert(definitions);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -83,7 +84,7 @@ public class HomeFragment extends Fragment {
                         @Override
                         public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                             Log.i("failed", Arrays.toString(responseBody));
-                            Toast.makeText(mContext, "Word not found", Toast.LENGTH_LONG);
+                            Toast.makeText(mContext, "Word not found", Toast.LENGTH_LONG).show();
                         }
                     });
                     editText.getText().clear();
@@ -91,37 +92,26 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(mContext, WordActivity.class);
-                intent.putExtra("word", words.get(position).first);
-                intent.putExtra("definitions", words.get(position).second);
-                startActivity(intent);
-            }
-        });
-
         return view;
     }
 
-    private HashMap<String, List<String>> getDefinitions(JSONObject object) {
-        HashMap<String, List<String>> map = new HashMap<>();
+    private List<DefinitionEntity> getDefinitions(JSONObject object, int wordId) {
+        List<DefinitionEntity> definitions = new ArrayList<>();
+        ;
         try {
             Iterator<String> keys = object.keys();
             while (keys.hasNext()) {
                 String key = keys.next();
                 JSONArray array = object.getJSONArray(key);
-                List<String> definitions = new ArrayList<>();
                 for (int i = 0; i < array.length(); i++) {
                     JSONObject def = array.getJSONObject(i);
-                    definitions.add(def.getString("definition"));
+                    definitions.add(new DefinitionEntity(wordId, def.getString("definition"), key));
                 }
-                map.put(key, definitions);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return map;
+        return definitions;
     }
 
 }

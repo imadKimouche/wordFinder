@@ -3,12 +3,14 @@ package com.ignite.wordfinder;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.ignite.wordfinder.db.entity.WordEntity;
@@ -45,7 +47,21 @@ public class MyWordsFragment extends Fragment {
                 adapter.notifyDataSetChanged();
             }
         });
+        mWordsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                WordEntity word = mWordsList.get(position);
+                openWordDetail(word);
+            }
+        });
 
         return view;
+    }
+
+
+    private void openWordDetail(WordEntity word) {
+        Intent intent = new Intent(mContext, WordDetail.class);
+        intent.putExtra("word", word);
+        startActivity(intent);
     }
 }
