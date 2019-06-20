@@ -8,7 +8,7 @@ import com.ignite.wordfinder.model.Word;
 
 @Entity(tableName = "words")
 public class WordEntity implements Word {
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     private int id;
     private String name;
 
@@ -34,8 +34,7 @@ public class WordEntity implements Word {
     }
 
     @Ignore
-    public WordEntity(int id, String name, String description, int price) {
-        this.id = id;
+    public WordEntity(String name) {
         this.name = name;
     }
 

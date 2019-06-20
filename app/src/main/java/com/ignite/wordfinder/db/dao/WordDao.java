@@ -16,8 +16,14 @@ public interface WordDao {
     @Query("SELECT * FROM words")
     LiveData<List<WordEntity>> loadAllWords();
 
+    @Query("SELECT * FROM words where name LIKE  :name")
+    WordEntity findByName(String name);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<WordEntity> words);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insert(WordEntity word);
 
     @Query("select * from words where id = :wordId")
     LiveData<WordEntity> loadWord(int wordId);

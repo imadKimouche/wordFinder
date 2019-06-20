@@ -1,97 +1,65 @@
 package com.ignite.wordfinder;
 
-import android.databinding.DataBindingUtil;
-import android.support.annotation.Nullable;
-import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.RecyclerView;
+import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
-import com.ignite.wordfinder.databinding.WordItemBinding;
-import com.ignite.wordfinder.model.Word;
+import com.ignite.wordfinder.db.entity.WordEntity;
 
 import java.util.List;
-import java.util.Objects;
 
-public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder> {
 
-    List<? extends Word> mWordList;
 
-    @Nullable
-    private final WordClickCallback mWordClickCallback;
+public class WordAdapter extends ArrayAdapter<WordEntity> {
 
-    public WordAdapter(@Nullable WordClickCallback clickCallback) {
-        mWordClickCallback = clickCallback;
-        setHasStableIds(true);
+    private List<WordEntity> mWordsList;
+
+    public WordAdapter(Context context, List<WordEntity> words) {
+        super(context, 0, words);
+        mWordsList = words;
     }
 
-    public void setWordList(final List<? extends Word> wordList) {
-        if (mWordList == null) {
-            mWordList = wordList;
-            notifyItemRangeInserted(0, wordList.size());
-        } else {
-            DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-                @Override
-                public int getOldListSize() {
-                    return mWordList.size();
-                }
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
 
-                @Override
-                public int getNewListSize() {
-                    return wordList.size();
-                }
-
-                @Override
-                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                    return mWordList.get(oldItemPosition).getId() ==
-                            wordList.get(newItemPosition).getId();
-                }
-
-                @Override
-                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                    Word newWord = wordList.get(newItemPosition);
-                    Word oldWord = mWordList.get(oldItemPosition);
-                    return newWord.getId() == oldWord.getId()
-                            && newWord.getName().equals(oldWord.getName());
-                }
-            });
-            mWordList = wordList;
-            result.dispatchUpdatesTo(this);
+        if (convertView == null) {
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.word_row, parent, false);
         }
-    }
 
-    @Override
-    public WordViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        WordItemBinding binding = DataBindingUtil
-                .inflate(LayoutInflater.from(parent.getContext()), R.layout.word_item,
-                        parent, false);
-        binding.setCallback(mWordClickCallback);
-        return new WordViewHolder(binding);
-    }
-
-    @Override
-    public void onBindViewHolder(WordViewHolder holder, int position) {
-        holder.binding.setWord(mWordList.get(position));
-        holder.binding.executePendingBindings();
-    }
-
-    @Override
-    public int getItemCount() {
-        return mWordList == null ? 0 : mWordList.size();
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return mWordList.get(position).getId();
-    }
-
-    static class WordViewHolder extends RecyclerView.ViewHolder {
-
-        final WordItemBinding binding;
-
-        public WordViewHolder(WordItemBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
+        FeedViewHolder viewHolder = (FeedViewHolder) convertView.getTag();
+        if (viewHolder == null) {
+            viewHolder = new FeedViewHolder();
+            viewHolder.title = convertView.findViewById(R.id.title);
+            convertView.setTag(viewHolder);
         }
+
+        WordEntity word = mWordsList.get(position);
+        if (word != null) {
+            viewHolder.title.setText(word.getName());
+        }
+
+
+        return convertView;
     }
+
+    private class FeedViewHolder {
+        public TextView title;
+    }
+
+    @Override
+    public int getCount() {
+        return mWordsList != null ? mWordsList.size() : 0;
+    }
+
+    public void setmWordsList(List<WordEntity> words) {
+        mWordsList = words;
+    }
+
+    public void addWord(WordEntity word) {
+        mWordsList.add(word);
+    }
+
 }

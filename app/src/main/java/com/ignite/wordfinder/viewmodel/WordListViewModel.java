@@ -18,32 +18,27 @@ public class WordListViewModel extends AndroidViewModel {
     private final DataRepository mRepository;
 
     // MediatorLiveData can observe other LiveData objects and react on their emissions.
-    private final MediatorLiveData<List<WordEntity>> mObservableWords;
+    private final LiveData<List<WordEntity>> mWordsList;
 
     public WordListViewModel(Application application) {
         super(application);
-
-        mObservableWords = new MediatorLiveData<>();
-        // set by default null, until we get data from the database.
-        mObservableWords.setValue(null);
-
-        mRepository = ((App) application).getRepository();
-        LiveData<List<WordEntity>> words = mRepository.getWords();
-
-        // observe the changes of the products from the database and forward them
-        mObservableWords.addSource(words, new Observer<List<WordEntity>>() {
-            @Override
-            public void onChanged(@Nullable List<WordEntity> value) {
-                mObservableWords.setValue(value);
-            }
-        });
+        mRepository = new DataRepository(application);
+        mWordsList = mRepository.getWords();
     }
+
+    /**
+     * Adds a word to the words list.
+     */
+    public void insert(WordEntity word) {
+        mRepository.insert(word);
+    }
+
 
     /**
      * Expose the LiveData Words query so the UI can observe it.
      */
     public LiveData<List<WordEntity>> getWords() {
-        return mObservableWords;
+        return mWordsList;
     }
 //
 //    public LiveData<List<WordEntity>> searchWords(String query) {

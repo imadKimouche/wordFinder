@@ -1,5 +1,6 @@
 package com.ignite.wordfinder;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,6 +19,9 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.ignite.wordfinder.db.entity.WordEntity;
+import com.ignite.wordfinder.model.Word;
+import com.ignite.wordfinder.viewmodel.WordListViewModel;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
 import org.json.JSONArray;
@@ -48,13 +52,13 @@ public class HomeFragment extends Fragment {
         mContext = inflater.getContext();
 
 
-
+        final WordListViewModel viewModel =
+                ViewModelProviders.of(this).get(WordListViewModel.class);
         listView = view.findViewById(R.id.list);
         findButton = view.findViewById(R.id.findButton);
         editText = view.findViewById(R.id.editText);
         final ArrayAdapter adapter = new ArrayAdapter(mContext, android.R.layout.simple_list_item_1, wordList);
         listView.setAdapter(adapter);
-
         findButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -70,6 +74,7 @@ public class HomeFragment extends Fragment {
                                 HashMap<String, List<String>> map;
                                 map = getDefinitions(new JSONObject(new String(responseBody)).getJSONObject("meaning"));
                                 words.add(new Pair<>(word, map));
+                                viewModel.insert(new WordEntity(word));
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
