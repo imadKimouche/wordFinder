@@ -1,7 +1,9 @@
 package com.ignite.wordfinder;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.util.Log;
@@ -17,7 +19,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.ignite.wordfinder.db.entity.DefinitionEntity;
@@ -35,6 +40,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import cz.msebera.android.httpclient.Header;
@@ -44,6 +50,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class Search extends Fragment {
 
+    private static final int MY_PERMISSIONS_REQUEST_ACCESS_AUDIO = 0;
     List<WordEntity> wordList = new ArrayList<>();
     List<DefinitionEntity> definitions = new ArrayList<>();
     HashMap<Integer, List<DefinitionEntity>> wordDefinitions = new HashMap<>();
@@ -52,6 +59,7 @@ public class Search extends Fragment {
     Button findButton;
     ImageButton voiceButton;
     EditText editText;
+    private boolean permissionGranted = false;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -87,11 +95,7 @@ public class Search extends Fragment {
                                 }
                                 wordDefinitions.put(wordObj.getId(), definitions);
                                 ((WordAdapter) adapter).notifyDataSetChanged();
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            } catch (ExecutionException e) {
+                            } catch (JSONException | InterruptedException | ExecutionException e) {
                                 e.printStackTrace();
                             }
                         }
@@ -137,18 +141,37 @@ public class Search extends Fragment {
     }
 
     private void startSpeechToText() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-                "Speak something...");
-        try {
-            startActivityForResult(intent, 1);
-        } catch (ActivityNotFoundException a) {
-            Toast.makeText(getContext(),
-                    "Sorry! Speech recognition is not supported in this device.",
-                    Toast.LENGTH_SHORT).show();
+        Log.d("t", String.valueOf(permissionGranted));
+        if (permissionGranted) {
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                    R.string.speakSomething);
+            try {
+                startActivityForResult(intent, 1);
+            } catch (ActivityNotFoundException a) {
+                Toast.makeText(getContext(),
+                        getString(R.string.SpeechNotsupported),
+                        Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            requestPermissions(new String[]{
+                    Manifest.permission.RECORD_AUDIO}, MY_PERMISSIONS_REQUEST_ACCESS_AUDIO);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        Log.d("onAnswer", "inside answer");
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_ACCESS_AUDIO: {
+                permissionGranted = (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED);
+                Log.d("case1", String.valueOf(permissionGranted));
+                return;
+            }
         }
     }
 

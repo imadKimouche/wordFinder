@@ -22,4 +22,6 @@
     <string name="wanna_delete">Wanna delete</string>
     <string name="cancel">Cancel</string>
     <string name="google_app_id">ca-app-pub-3742006989972718~6939904216</string>
+    <string name="speakSomething">Speak something...</string>
+    <string name="SpeechNotsupported">Sorry! Speech recognition is not supported in this device.</string>
 </resources>
