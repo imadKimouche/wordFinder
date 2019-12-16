@@ -1,13 +1,14 @@
 package com.ignite.wordfinder.db;
 
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.persistence.room.Database;
-import android.arch.persistence.room.Room;
-import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
-import android.support.annotation.VisibleForTesting;
+
+import androidx.annotation.VisibleForTesting;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.room.Database;
+import androidx.room.Room;
+import androidx.room.RoomDatabase;
 
 import com.ignite.wordfinder.db.dao.DefinitionDao;
 import com.ignite.wordfinder.db.dao.WordDao;
@@ -59,7 +60,6 @@ public abstract class AppDatabase extends RoomDatabase {
             @Override
             public void run() {
                 database.wordDao().insertAll(words);
-                database.definitionDao().insertAll(definitions);
             }
         });
     }

@@ -1,14 +1,15 @@
 package com.ignite.wordfinder.viewmodel;
 
 import android.app.Application;
-import android.arch.lifecycle.AndroidViewModel;
-import android.arch.lifecycle.LiveData;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 
 import com.ignite.wordfinder.db.DataRepository;
 import com.ignite.wordfinder.db.entity.DefinitionEntity;
 import com.ignite.wordfinder.db.entity.WordEntity;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class WordListViewModel extends AndroidViewModel {
 
@@ -26,8 +27,8 @@ public class WordListViewModel extends AndroidViewModel {
     /**
      * Adds a word to the words list.
      */
-    public void insert(WordEntity word) {
-        mRepository.insert(word);
+    public Long insert(WordEntity word) throws ExecutionException, InterruptedException {
+        return mRepository.insert(word);
     }
 
 
@@ -38,17 +39,22 @@ public class WordListViewModel extends AndroidViewModel {
         return mWordsList;
     }
 
-    public void insert(List<DefinitionEntity> definitions) {
-        mRepository.insert(definitions);
+    public void insert(DefinitionEntity definition) {
+        mRepository.insert(definition);
     }
 
     public WordEntity getWordByName(String word) {
         return mRepository.getWordByName(word);
     }
 
-    public LiveData<List<DefinitionEntity>> loadDefinitions(int wordId) {
+    public List<DefinitionEntity> loadDefinitions(int wordId) throws ExecutionException, InterruptedException {
         return mRepository.loadDefinitions(wordId);
     }
+
+    public void deleteByWordId(int wordId) {
+        mRepository.deleteByWordId(wordId);
+    }
+
 //
 //    public LiveData<List<WordEntity>> searchWords(String query) {
 //        return mRepository.searchWords(query);

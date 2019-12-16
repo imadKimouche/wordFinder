@@ -1,7 +1,7 @@
 package com.ignite.wordfinder.db;
 
 import android.app.Application;
-import android.arch.lifecycle.LiveData;
+import androidx.lifecycle.LiveData;
 import android.os.AsyncTask;
 
 import com.ignite.wordfinder.db.dao.DefinitionDao;
@@ -45,12 +45,12 @@ public class DataRepository {
         return mWordsList;
     }
 
-    public void insert(final WordEntity word) {
-        AsyncTask<WordEntity, Void, Void> task = new insertAsyncTask(mDatabase.wordDao()).execute(word);
-
+    public Long insert(final WordEntity word) throws ExecutionException, InterruptedException {
+        AsyncTask<WordEntity, Void, Long> task = new insertAsyncTask(mDatabase.wordDao()).execute(word);
+        return task.get();
     }
 
-    private static class insertAsyncTask extends AsyncTask<WordEntity, Void, Void> {
+    private static class insertAsyncTask extends AsyncTask<WordEntity, Void, Long> {
 
         private WordDao mAsyncTaskDao;
 
@@ -59,9 +59,9 @@ public class DataRepository {
         }
 
         @Override
-        protected Void doInBackground(final WordEntity... params) {
+        protected Long doInBackground(final WordEntity... params) {
             if (mAsyncTaskDao.findByName(params[0].getName()) == null) {
-                mAsyncTaskDao.insert(params[0]);
+                return mAsyncTaskDao.insert(params[0]);
             }
             return null;
         }
@@ -92,16 +92,31 @@ public class DataRepository {
         return mDatabase.wordDao().loadWord(wordId);
     }
 
-    public LiveData<List<DefinitionEntity>> loadDefinitions(final int wordId) {
-        return mDatabase.definitionDao().loadDefinitions(wordId);
+    public List<DefinitionEntity> loadDefinitions(final int wordId) throws ExecutionException, InterruptedException {
+        AsyncTask<Integer, Void, List<DefinitionEntity>> task = new loadDefAsyncTask(mDatabase.definitionDao()).execute(wordId);
+        return task.get();
     }
 
-    public void insert(List<DefinitionEntity> definitions) {
-        mDatabase.definitionDao().insertAll(definitions);
+    private static class loadDefAsyncTask extends AsyncTask<Integer, Void, List<DefinitionEntity>> {
+
+        private DefinitionDao mAsyncTaskDao;
+
+        loadDefAsyncTask(DefinitionDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected List<DefinitionEntity> doInBackground(Integer... ids) {
+            return mAsyncTaskDao.loadDefinitions(ids[0]);
+        }
+    }
+
+    public void insert(DefinitionEntity definition) {
+        AsyncTask<DefinitionEntity, Void, Void> task = new insertDefAsyncTask(mDatabase.definitionDao()).execute(definition);
     }
 
 
-    private static class insertDefAsyncTask extends AsyncTask<List<DefinitionEntity>, Void, Void> {
+    private static class insertDefAsyncTask extends AsyncTask<DefinitionEntity, Void, Void> {
 
         private DefinitionDao mAsyncTaskDao;
 
@@ -110,12 +125,11 @@ public class DataRepository {
         }
 
         @Override
-        protected Void doInBackground(List<DefinitionEntity>... lists) {
-            mAsyncTaskDao.insertAll(lists);
+        protected Void doInBackground(DefinitionEntity... list) {
+            mAsyncTaskDao.insertAll(list[0]);
             return null;
         }
     }
-
 
     public WordEntity getWordByName(String word) {
         WordEntity result = null;
@@ -141,6 +155,26 @@ public class DataRepository {
         @Override
         protected WordEntity doInBackground(final String... params) {
             return mAsyncTaskDao.getWordByName(params[0]);
+        }
+    }
+
+    public void deleteByWordId(int wordId) {
+        AsyncTask<Integer, Void, Void> task = new dbwiAsyncTask(mDatabase.wordDao()).execute(wordId);
+    }
+
+
+    private static class dbwiAsyncTask extends AsyncTask<Integer, Void, Void> {
+
+        private WordDao mAsyncTaskDao;
+
+        dbwiAsyncTask(WordDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(Integer... params) {
+            mAsyncTaskDao.deleteByWordId(params[0]);
+            return null;
         }
     }
 

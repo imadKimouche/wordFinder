@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MyWords">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp">
+
+        <EditText
+            android:id="@+id/words_search_box"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_alignEnd="@+id/voice"
+            android:layout_alignRight="@+id/voice"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginLeft="0dp"
+            android:layout_marginEnd="0dp"
+            android:layout_marginRight="0dp"
+            android:textSize="16sp"
+            android:hint="@string/search_words_dots"
+            android:fontFamily="@font/opensans"
+            android:inputType="textPersonName"
+            android:theme="@style/MyEditTextTheme" />
+
+        <ImageButton
+            android:id="@+id/voice"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:tint="@color/main_1"
+            android:backgroundTint="@color/transparent"
+            android:src="@drawable/ic_search" />
+
+    </RelativeLayout>
+
+
+    <ExpandableListView
+        android:id="@+id/wordsLv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="70dp"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="0.5dp"
+        android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft" />
+
+</FrameLayout>

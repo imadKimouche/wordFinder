@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">wordFinder</string>
+    <string name="find">Trouver</string>
+    <string name="loading_words">En train de charger les mots...</string>
+    <string name="nav_home">Accueil</string>
+    <string name="nav_my_words">Mes Mots</string>
+    <string name="search_words">Trouver des mots</string>
+    <string name="search_words_dots">Trouver des mots...</string>
+    <string name="word">Mot</string>
+    <string name="my_words">Mes Mots</string>
+    <string name="search">Rechercher</string>
+    <string name="add">Ajouter</string>
+    <string name="what_s_new">Quoi de neuf?</string>
+    <string name="cancel">Annuler</string>
+    <string name="wanna_delete">Voulez-vous supprimer</string>
+    <string name="delete">Supprimer</string>
+</resources>

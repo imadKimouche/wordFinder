@@ -1,15 +1,16 @@
 package com.ignite.wordfinder.viewmodel;
 
 import android.app.Application;
-import android.arch.lifecycle.AndroidViewModel;
-import android.arch.lifecycle.LiveData;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 
 import com.ignite.wordfinder.db.DataRepository;
 import com.ignite.wordfinder.db.entity.DefinitionEntity;
 import com.ignite.wordfinder.db.entity.WordEntity;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class WordViewModel extends AndroidViewModel {
 
@@ -20,15 +21,15 @@ public class WordViewModel extends AndroidViewModel {
         mRepository = new DataRepository(application);
     }
 
-    public void insert(List<DefinitionEntity> definitions) {
-        mRepository.insert(definitions);
+    public void insert(DefinitionEntity definition) {
+        mRepository.insert(definition);
     }
 
     public WordEntity getWordByName(String word) {
         return mRepository.getWordByName(word);
     }
 
-    public LiveData<List<DefinitionEntity>> loadDefinitions(int wordId) {
+    public List<DefinitionEntity> loadDefinitions(int wordId) throws ExecutionException, InterruptedException {
         return mRepository.loadDefinitions(wordId);
     }
 }
